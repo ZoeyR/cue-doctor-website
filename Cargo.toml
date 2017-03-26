@@ -6,3 +6,5 @@ authors = ["Daniel Griffen <daniel@griffen.io>"]
 [dependencies]
 rocket = "0.2.2"
 rocket_codegen = "0.2.2"
+diesel = {version = "0.11", features = ["postgres"]}
+diesel_codegen = {version = "0.11", features = ["postgres"]}
