@@ -7,9 +7,9 @@ use std::path::{Path, PathBuf};
 
 use rocket::response::NamedFile;
 use rocket::config::{Config, Environment};
-#[get("/assets/<file..>")]
+#[get("/<file..>")]
 fn assets(file: PathBuf) -> Option<NamedFile> {
-    NamedFile::open(Path::new("static/").join(file)).ok()
+    NamedFile::open(Path::new("www/").join(file)).ok()
 }
 
 #[get("/")]
