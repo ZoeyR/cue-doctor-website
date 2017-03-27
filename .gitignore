@@ -3,3 +3,4 @@ target/
 Cargo.lock
 www/node_modules
 .vscode/
+.env
