@@ -38,6 +38,7 @@ mod errors;
 mod test;
 
 enum DbPool {
+    #[cfg(test)]
     Test(fn() -> PgConnection),
     Real(Pool<ConnectionManager<PgConnection>>),
 }
@@ -46,6 +47,7 @@ impl DbPool {
     pub fn get(&self) -> Result<DbConnection> {
         use DbPool::*;
         match self {
+            #[cfg(test)]
             &Test(ref establish) => {
                 let conn = establish();
                 Ok(DbConnection::Test(conn))
@@ -56,6 +58,7 @@ impl DbPool {
 }
 
 enum DbConnection {
+    #[cfg(test)]
     Test(PgConnection),
     Real(r2d2::PooledConnection<r2d2_diesel::ConnectionManager<PgConnection>>),
 }
@@ -66,6 +69,7 @@ impl Deref for DbConnection {
     fn deref(&self) -> &Self::Target {
         use DbConnection::*;
         match self {
+            #[cfg(test)]
             &Test(ref conn) => conn,
             &Real(ref conn) => conn.deref(), 
         }
@@ -117,7 +121,8 @@ fn new_order(order: JSON<frontend::Order>, db: State<DbPool>) -> Result<JSON<i32
         })
         .collect::<Vec<_>>();
 
-    diesel::insert(&new_items_iter).into(order_items::table).get_results::<models::OrderItem>(&*db)?;
+    diesel::insert(&new_items_iter).into(order_items::table)
+        .get_results::<models::OrderItem>(&*db)?;
 
     Ok(JSON(model_order.id))
 }
@@ -134,16 +139,16 @@ fn get_order(order_id: OrderId, db: State<DbPool>) -> Result<JSON<frontend::Orde
 
     let frontend_items = model_items.into_iter()
         .map(|(item, product): (models::OrderItem, _)| {
-                 frontend::OrderItem {
-                     product: product,
-                     quantity: item.quantity,
-                 }
-             })
+            frontend::OrderItem {
+                product: product,
+                quantity: item.quantity,
+            }
+        })
         .collect();
     Ok(JSON(frontend::Order {
-                items: frontend_items,
-                address: order.address,
-            }))
+        items: frontend_items,
+        address: order.address,
+    }))
 }
 
 #[get("/products?<product_id>")]
@@ -172,8 +177,8 @@ fn main() {
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let r2d2_config = Config::default();
     let connection_manager = ConnectionManager::<PgConnection>::new(database_url);
-    let pool =
-        Pool::new(r2d2_config, connection_manager).expect("Failed to created connection pool.");
+    let pool = Pool::new(r2d2_config, connection_manager)
+        .expect("Failed to created connection pool.");
 
     rocket::ignite()
         .mount("/",
