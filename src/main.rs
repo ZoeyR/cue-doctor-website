@@ -36,11 +36,16 @@ type DbPool = Pool<ConnectionManager<PgConnection>>;
 struct ProductId {
     id: i32,
 }
+
+#[derive(FromForm)]
+struct OrderId {
+    id: i32,
+}
 // paths needed
 // put orders
 // get order
 
-#[get("/<file..>")]
+#[get("/static/<file..>")]
 fn assets(file: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new("www/").join(file)).ok()
 }
@@ -53,6 +58,35 @@ fn index() -> Option<NamedFile> {
 #[post("/orders", format = "application/json", data = "<order>")]
 fn new_order(order: JSON<frontend::Order>, db: State<DbPool>) -> &'static str {
     unimplemented!()
+}
+
+#[post("/orders?<order_id>")]
+fn get_order(order_id: OrderId, db: State<DbPool>) -> Result<JSON<frontend::Order>, ()> {
+    use schema::*;
+
+    let db = db.inner()
+        .get()
+        .map_err(|_| ())?;
+    let order = orders::table.filter(orders::id.eq(order_id.id))
+        .first::<models::Order>(&*db)
+        .map_err(|_| ())?;
+    let model_items = order_items::table.inner_join(products::table)
+        .filter(order_items::id.eq(order_id.id))
+        .load(&*db)
+        .map_err(|_| ())?;
+
+    let frontend_items = model_items.into_iter()
+        .map(|(item, product): (models::OrderItem, _)| {
+                 frontend::OrderItem {
+                     product: product,
+                     quantity: item.quantity,
+                 }
+             })
+        .collect();
+    Ok(JSON(frontend::Order {
+                items: frontend_items,
+                address: order.address,
+            }))
 }
 
 #[get("/products?<product_id>")]
@@ -78,5 +112,5 @@ fn main() {
     let pool =
         Pool::new(r2d2_config, connection_manager).expect("Failed to created connection pool.");
 
-    rocket::ignite().mount("/", routes![index, assets, products]).manage(pool).launch();
+    rocket::ignite().mount("/", routes![index, assets, products, get_order]).manage(pool).launch();
 }
