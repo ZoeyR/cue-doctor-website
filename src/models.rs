@@ -7,11 +7,25 @@ pub struct Order {
     pub address: String,
 }
 
+#[derive(Insertable)]
+#[table_name="orders"]
+pub struct NewOrder<'a> {
+    pub address: &'a str,
+}
+
 #[derive(Associations, Identifiable, Queryable)]
 #[belongs_to(Order)]
 #[belongs_to(Product)]
 pub struct OrderItem {
     pub id: i32,
+    pub order_id: i32,
+    pub product_id: i32,
+    pub quantity: i32,
+}
+
+#[derive(Insertable)]
+#[table_name="order_items"]
+pub struct NewOrderItem {
     pub order_id: i32,
     pub product_id: i32,
     pub quantity: i32,

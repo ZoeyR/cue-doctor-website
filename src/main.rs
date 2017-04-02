@@ -56,8 +56,35 @@ fn index() -> Option<NamedFile> {
 }
 
 #[post("/orders", format = "application/json", data = "<order>")]
-fn new_order(order: JSON<frontend::Order>, db: State<DbPool>) -> &'static str {
-    unimplemented!()
+fn new_order(order: JSON<frontend::Order>, db: State<DbPool>) -> Result<(), ()> {
+    use schema::*;
+
+    let db = db.inner()
+        .get()
+        .map_err(|_| ())?;
+
+    let new_order = models::NewOrder { address: &order.0.address };
+    let model_order = diesel::insert(&new_order).into(orders::table)
+        .get_result::<models::Order>(&*db)
+        .map_err(|_| ())?;
+
+    let new_items_iter = order.0
+        .items
+        .into_iter()
+        .map(|item| {
+            models::NewOrderItem {
+                order_id: model_order.id,
+                product_id: item.product.id,
+                quantity: item.quantity,
+            }
+        })
+        .collect::<Vec<_>>();
+
+    diesel::insert(&new_items_iter)
+        .into(order_items::table)
+        .get_results::<models::OrderItem>(&*db)
+        .map(|_| ())
+        .map_err(|_| ())
 }
 
 #[post("/orders?<order_id>")]
@@ -112,5 +139,8 @@ fn main() {
     let pool =
         Pool::new(r2d2_config, connection_manager).expect("Failed to created connection pool.");
 
-    rocket::ignite().mount("/", routes![index, assets, products, get_order]).manage(pool).launch();
+    rocket::ignite()
+        .mount("/", routes![index, assets, products, new_order, get_order])
+        .manage(pool)
+        .launch();
 }
