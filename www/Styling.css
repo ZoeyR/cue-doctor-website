@@ -1,0 +1,24 @@
+
+    #footer {
+        text-align: center;
+    }
+    #topnav {
+        width: 940px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    #topsquare {
+        background-color: aquamarine;
+        width: 150px;
+        height: 75px;
+        text-align: center;
+    }
+
+
+
+#body {
+    margin: 0 auto;
+    width: 500px;
+    
+}
