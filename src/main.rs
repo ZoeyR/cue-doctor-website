@@ -17,6 +17,7 @@ extern crate serde_derive;
 
 use std::env;
 use std::path::{Path, PathBuf};
+use std::ops::Deref;
 
 use errors::*;
 use diesel::pg::PgConnection;
@@ -33,7 +34,45 @@ mod models;
 mod schema;
 mod errors;
 
-type DbPool = Pool<ConnectionManager<PgConnection>>;
+enum DbPool {
+    Test,
+    Real(Pool<ConnectionManager<PgConnection>>),
+}
+
+impl DbPool {
+    pub fn get(&self) -> Result<DbConnection> {
+        use DbPool::*;
+        match self {
+            &Test => {
+                dotenv().ok();
+                let connection_url = env::var("DATABASE_URL")
+                    .expect("DATABASE_URL must be set in order to run tests");
+                let conn = ::diesel::pg::PgConnection::establish(&connection_url).unwrap();
+                conn.begin_test_transaction().unwrap();
+
+                Ok(DbConnection::Test(conn))
+            }
+            &Real(ref pool) => Ok(DbConnection::Real(pool.get()?)),
+        }
+    }
+}
+
+enum DbConnection {
+    Test(PgConnection),
+    Real(r2d2::PooledConnection<r2d2_diesel::ConnectionManager<PgConnection>>),
+}
+
+impl Deref for DbConnection {
+    type Target = PgConnection;
+
+    fn deref(&self) -> &Self::Target {
+        use DbConnection::*;
+        match self {
+            &Test(ref conn) => conn,
+            &Real(ref conn) => conn.deref(), 
+        }
+    }
+}
 
 #[derive(FromForm)]
 struct ProductId {
@@ -80,8 +119,7 @@ fn new_order(order: JSON<frontend::Order>, db: State<DbPool>) -> Result<JSON<i32
         })
         .collect::<Vec<_>>();
 
-    diesel::insert(&new_items_iter).into(order_items::table)
-        .get_results::<models::OrderItem>(&*db)?;
+    diesel::insert(&new_items_iter).into(order_items::table).get_results::<models::OrderItem>(&*db)?;
 
     Ok(JSON(model_order.id))
 }
@@ -142,6 +180,6 @@ fn main() {
     rocket::ignite()
         .mount("/",
                routes![index, assets, products, all_products, new_order, get_order])
-        .manage(pool)
+        .manage(DbPool::Real(pool))
         .launch();
 }
