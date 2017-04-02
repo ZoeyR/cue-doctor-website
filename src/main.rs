@@ -34,8 +34,11 @@ mod models;
 mod schema;
 mod errors;
 
+#[cfg(test)]
+mod test;
+
 enum DbPool {
-    Test,
+    Test(fn() -> PgConnection),
     Real(Pool<ConnectionManager<PgConnection>>),
 }
 
@@ -43,13 +46,8 @@ impl DbPool {
     pub fn get(&self) -> Result<DbConnection> {
         use DbPool::*;
         match self {
-            &Test => {
-                dotenv().ok();
-                let connection_url = env::var("DATABASE_URL")
-                    .expect("DATABASE_URL must be set in order to run tests");
-                let conn = ::diesel::pg::PgConnection::establish(&connection_url).unwrap();
-                conn.begin_test_transaction().unwrap();
-
+            &Test(ref establish) => {
+                let conn = establish();
                 Ok(DbConnection::Test(conn))
             }
             &Real(ref pool) => Ok(DbConnection::Real(pool.get()?)),
@@ -124,7 +122,7 @@ fn new_order(order: JSON<frontend::Order>, db: State<DbPool>) -> Result<JSON<i32
     Ok(JSON(model_order.id))
 }
 
-#[post("/orders?<order_id>")]
+#[get("/orders?<order_id>")]
 fn get_order(order_id: OrderId, db: State<DbPool>) -> Result<JSON<frontend::Order>> {
     use schema::*;
 

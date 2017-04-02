@@ -31,7 +31,7 @@ pub struct NewOrderItem {
     pub quantity: i32,
 }
 
-#[derive(Associations, Identifiable, Serialize, Deserialize, Queryable)]
+#[derive(Associations, Identifiable, Serialize, Deserialize, Debug, Queryable, Eq, PartialEq)]
 #[has_many(order_items)]
 pub struct Product {
     pub id: i32,

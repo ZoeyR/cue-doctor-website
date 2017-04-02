@@ -18,3 +18,4 @@ serde_derive = "0.9"
 
 [dev-dependencies]
 rocket = {version = "0.2.3", features =["testing"]}
+serde_json = "0.9"
