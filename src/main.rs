@@ -130,6 +130,18 @@ fn products(product_id: ProductId, db: State<DbPool>) -> Result<JSON<frontend::P
     Ok(JSON(product.into()))
 }
 
+#[get("/products")]
+fn all_products(db: State<DbPool>) -> Result<JSON<Vec<frontend::Product>>, ()> {
+    use schema::products::dsl::*;
+
+    let db = db.inner()
+        .get()
+        .map_err(|_| ())?;
+    let products_res = products.load::<models::Product>(&*db).map_err(|_| ())?;
+
+    Ok(JSON(products_res))
+}
+
 fn main() {
     dotenv().ok();
 
@@ -140,7 +152,8 @@ fn main() {
         Pool::new(r2d2_config, connection_manager).expect("Failed to created connection pool.");
 
     rocket::ignite()
-        .mount("/", routes![index, assets, products, new_order, get_order])
+        .mount("/",
+               routes![index, assets, products, all_products, new_order, get_order])
         .manage(pool)
         .launch();
 }
