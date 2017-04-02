@@ -6,9 +6,10 @@ extern crate diesel;
 #[macro_use]
 extern crate diesel_codegen;
 extern crate dotenv;
+#[macro_use]
+extern crate error_chain;
 extern crate r2d2;
 extern crate r2d2_diesel;
-#[macro_use]
 extern crate rocket;
 extern crate rocket_contrib;
 #[macro_use]
@@ -17,6 +18,7 @@ extern crate serde_derive;
 use std::env;
 use std::path::{Path, PathBuf};
 
+use errors::*;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use dotenv::dotenv;
@@ -29,6 +31,7 @@ use rocket_contrib::JSON;
 mod frontend;
 mod models;
 mod schema;
+mod errors;
 
 type DbPool = Pool<ConnectionManager<PgConnection>>;
 
@@ -56,17 +59,14 @@ fn index() -> Option<NamedFile> {
 }
 
 #[post("/orders", format = "application/json", data = "<order>")]
-fn new_order(order: JSON<frontend::Order>, db: State<DbPool>) -> Result<(), ()> {
+fn new_order(order: JSON<frontend::Order>, db: State<DbPool>) -> Result<JSON<i32>> {
     use schema::*;
 
-    let db = db.inner()
-        .get()
-        .map_err(|_| ())?;
+    let db = db.inner().get()?;
 
     let new_order = models::NewOrder { address: &order.0.address };
     let model_order = diesel::insert(&new_order).into(orders::table)
-        .get_result::<models::Order>(&*db)
-        .map_err(|_| ())?;
+        .get_result::<models::Order>(&*db)?;
 
     let new_items_iter = order.0
         .items
@@ -80,27 +80,21 @@ fn new_order(order: JSON<frontend::Order>, db: State<DbPool>) -> Result<(), ()> 
         })
         .collect::<Vec<_>>();
 
-    diesel::insert(&new_items_iter)
-        .into(order_items::table)
-        .get_results::<models::OrderItem>(&*db)
-        .map(|_| ())
-        .map_err(|_| ())
+    diesel::insert(&new_items_iter).into(order_items::table)
+        .get_results::<models::OrderItem>(&*db)?;
+
+    Ok(JSON(model_order.id))
 }
 
 #[post("/orders?<order_id>")]
-fn get_order(order_id: OrderId, db: State<DbPool>) -> Result<JSON<frontend::Order>, ()> {
+fn get_order(order_id: OrderId, db: State<DbPool>) -> Result<JSON<frontend::Order>> {
     use schema::*;
 
-    let db = db.inner()
-        .get()
-        .map_err(|_| ())?;
-    let order = orders::table.filter(orders::id.eq(order_id.id))
-        .first::<models::Order>(&*db)
-        .map_err(|_| ())?;
+    let db = db.inner().get()?;
+    let order = orders::table.filter(orders::id.eq(order_id.id)).first::<models::Order>(&*db)?;
     let model_items = order_items::table.inner_join(products::table)
         .filter(order_items::id.eq(order_id.id))
-        .load(&*db)
-        .map_err(|_| ())?;
+        .load(&*db)?;
 
     let frontend_items = model_items.into_iter()
         .map(|(item, product): (models::OrderItem, _)| {
@@ -117,27 +111,21 @@ fn get_order(order_id: OrderId, db: State<DbPool>) -> Result<JSON<frontend::Orde
 }
 
 #[get("/products?<product_id>")]
-fn products(product_id: ProductId, db: State<DbPool>) -> Result<JSON<frontend::Product>, ()> {
+fn products(product_id: ProductId, db: State<DbPool>) -> Result<JSON<frontend::Product>> {
     use schema::products::dsl::*;
 
-    let db = db.inner()
-        .get()
-        .map_err(|_| ())?;
-    let product = products.filter(id.eq(product_id.id))
-        .first::<models::Product>(&*db)
-        .map_err(|_| ())?;
+    let db = db.inner().get()?;
+    let product = products.filter(id.eq(product_id.id)).first::<models::Product>(&*db)?;
 
     Ok(JSON(product.into()))
 }
 
 #[get("/products")]
-fn all_products(db: State<DbPool>) -> Result<JSON<Vec<frontend::Product>>, ()> {
+fn all_products(db: State<DbPool>) -> Result<JSON<Vec<frontend::Product>>> {
     use schema::products::dsl::*;
 
-    let db = db.inner()
-        .get()
-        .map_err(|_| ())?;
-    let products_res = products.load::<models::Product>(&*db).map_err(|_| ())?;
+    let db = db.inner().get()?;
+    let products_res = products.load::<models::Product>(&*db)?;
 
     Ok(JSON(products_res))
 }
