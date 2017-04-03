@@ -23,6 +23,7 @@ before_script:
   - apt-get install wget -y
   - apt-get install curl -y
   - apt-get install build-essential -y
+  - apt-get install libpq-dev -y
   - curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly
   - export PATH="$HOME/.cargo/bin:$PATH"
   - echo $PATH
