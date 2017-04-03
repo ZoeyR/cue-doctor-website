@@ -15,7 +15,5 @@ script:
   - cargo test --verbose --jobs 1 #one thread prevents output mangling
 
 env:
-  # TODO: why is there no database specified for Postgres?
-  matrix:
-    DATABASE_TEST_URL: postgres://postgres@localhost/cue_doc_test
-    DATABASE_URL: postgres://postgres@localhost/cue_doc_test
+  - DATABASE_TEST_URL=postgres://postgres@localhost/cue_doc_test
+  - DATABASE_URL=postgres://postgres@localhost/cue_doc_test
