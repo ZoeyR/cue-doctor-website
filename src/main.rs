@@ -1,5 +1,6 @@
 #![feature(plugin, custom_derive)]
 #![plugin(rocket_codegen)]
+#![cfg_attr(test, allow(unmounted_route))]
 
 #[macro_use]
 extern crate diesel;

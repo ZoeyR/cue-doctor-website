@@ -1,5 +1,3 @@
-
-
 extern crate serde_json;
 
 use std::env;
@@ -14,15 +12,7 @@ use self::serde_json::from_str;
 #[test]
 fn all_products() {
     let test_db = DbPool::Test(test_connection);
-    let rocket = rocket::ignite()
-        .mount("/",
-               routes![super::all_products,
-                       super::products,
-                       super::new_order,
-                       super::get_order,
-                       super::assets,
-                       super::index])
-        .manage(test_db);
+    let rocket = rocket::ignite().mount("/", routes![super::all_products]).manage(test_db);
 
     let mut req = MockRequest::new(Method::Get, "/products");
     let mut res = req.dispatch_with(&rocket);
@@ -39,15 +29,7 @@ fn all_products() {
 #[test]
 fn one_product() {
     let test_db = DbPool::Test(test_connection);
-    let rocket = rocket::ignite()
-        .mount("/",
-               routes![super::all_products,
-                       super::products,
-                       super::new_order,
-                       super::get_order,
-                       super::assets,
-                       super::index])
-        .manage(test_db);
+    let rocket = rocket::ignite().mount("/", routes![super::products]).manage(test_db);
 
     let mut req = MockRequest::new(Method::Get, "/products?id=1");
     let mut res = req.dispatch_with(&rocket);
@@ -74,27 +56,10 @@ fn new_order() {
                             price: 550,
                         },
                         quantity: 3,
-                    },
-                    OrderItem {
-                        product: Product {
-                            id: 2,
-                            name: "Shaft Cleaner".into(),
-                            description: "TODO".into(),
-                            price: 850,
-                        },
-                        quantity: 4,
                     }],
         address: "None".into(),
     };
-    let rocket = rocket::ignite()
-        .mount("/",
-               routes![super::all_products,
-                       super::products,
-                       super::new_order,
-                       super::get_order,
-                       super::assets,
-                       super::index])
-        .manage(test_db);
+    let rocket = rocket::ignite().mount("/", routes![super::new_order]).manage(test_db);
 
     let mut req = MockRequest::new(Method::Post, "/orders")
         .header(ContentType::JSON)
@@ -117,18 +82,19 @@ fn get_order() {
                             price: 550,
                         },
                         quantity: 3,
+                    },
+                    OrderItem {
+                        product: Product {
+                            id: 2,
+                            name: "Shaft Cleaner".into(),
+                            description: "TODO".into(),
+                            price: 850,
+                        },
+                        quantity: 4,
                     }],
         address: "None".into(),
     };
-    let rocket = rocket::ignite()
-        .mount("/",
-               routes![super::all_products,
-                       super::products,
-                       super::new_order,
-                       super::get_order,
-                       super::assets,
-                       super::index])
-        .manage(test_db);
+    let rocket = rocket::ignite().mount("/", routes![super::get_order]).manage(test_db);
 
     let mut req = MockRequest::new(Method::Get, "/orders?id=1");
     let mut res = req.dispatch_with(&rocket);
@@ -162,6 +128,9 @@ fn test_connection_with_order() -> PgConnection {
         .unwrap();
     conn.execute("INSERT INTO order_items (id, order_id, product_id, quantity) VALUES (2, 1, 2, \
                   4)")
+        .unwrap();
+    conn.execute("INSERT INTO order_items (id, order_id, product_id, quantity) VALUES (3, 2, 2, \
+                  5)")
         .unwrap();
 
     conn
