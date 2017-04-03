@@ -135,7 +135,7 @@ fn get_order(order_id: OrderId, db: State<DbPool>) -> Result<JSON<frontend::Orde
     let db = db.inner().get()?;
     let order = orders::table.filter(orders::id.eq(order_id.id)).first::<models::Order>(&*db)?;
     let model_items = order_items::table.inner_join(products::table)
-        .filter(order_items::id.eq(order_id.id))
+        .filter(order_items::order_id.eq(order_id.id))
         .load(&*db)?;
 
     let frontend_items = model_items.into_iter()
