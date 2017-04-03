@@ -15,5 +15,6 @@ script:
   - cargo test --verbose --jobs 1 #one thread prevents output mangling
 
 env:
-  - DATABASE_TEST_URL=postgres://postgres@localhost/cue_doc_test
-  - DATABASE_URL=postgres://postgres@localhost/cue_doc_test
+  global:
+    - DATABASE_URL=postgres://postgres@localhost/cue_doc_test
+    - DATABASE_TEST_URL=postgres://postgres@localhost/cue_doc_test
