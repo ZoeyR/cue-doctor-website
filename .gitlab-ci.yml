@@ -28,7 +28,7 @@ before_script:
   - export PATH="$HOME/.cargo/bin:$PATH"
   - echo $PATH
   - rustc --version && cargo --version      # Print version info for debugging
-  - cargo install diesel_cli
+  - cargo install diesel_cli --no-default-features --features=postgres
   - diesel setup
 
 stages:
