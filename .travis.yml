@@ -1,0 +1,21 @@
+language: rust
+rust:
+  - nightly
+
+addons:
+  postgresql: '9.6'
+
+before_script:
+  - export PATH="$HOME/.cargo/bin:$PATH"
+  - echo $PATH
+  - rustc -vV && cargo -vV
+  - cargo install diesel_cli --no-default-features --features=postgres
+  - diesel setup
+script:
+  - cargo test --verbose --jobs 1
+
+env:
+  # TODO: why is there no database specified for Postgres?
+  matrix:
+    DATABASE_TEST_URL: postgres://postgres@localhost/cue_doc_test
+    DATABASE_URL: postgres://postgres@localhost/cue_doc_test
