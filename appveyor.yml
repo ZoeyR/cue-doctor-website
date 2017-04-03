@@ -20,7 +20,7 @@ install:
   - echo %PATH%
   - rustc -vV
   - cargo -vV
-  - cargo install diesel_cli
+  - cargo install diesel_cli --no-default-features --features=postgres
 
 ## Build Script ##
 
