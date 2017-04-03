@@ -12,7 +12,7 @@ before_script:
   - cargo install diesel_cli --no-default-features --features=postgres
   - diesel setup
 script:
-  - cargo test --verbose --jobs 1
+  - cargo test --verbose --jobs 1 #one thread prevents output mangling
 
 env:
   # TODO: why is there no database specified for Postgres?
