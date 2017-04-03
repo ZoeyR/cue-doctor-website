@@ -3,8 +3,8 @@ environment:
     PGUSER: postgres
     PGPASSWORD: Password12!
     MYSQL_PWD: Password12!
-    DATABASE_TEST_URL: postgres://gitlab_ci_runner@postgres/cue_doc_test
-    DATABASE_URL: postgres://gitlab_ci_runner@postgres/cue_doc_test
+    DATABASE_TEST_URL: postgres://postgres:Password12!@localhost/cue_doc_test
+    DATABASE_URL: postgres://postgres:Password12!@localhost/cue_doc_test
   matrix:
     - channel: nightly
       target: x86_64-pc-windows-gnu
