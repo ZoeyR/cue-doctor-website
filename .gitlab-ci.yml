@@ -1,0 +1,52 @@
+# This file is a template, and might need editing before it works on your project.
+# Unofficial language image. Look for the different tagged releases at:
+# https://hub.docker.com/r/scorpil/rust/tags/
+image: "ubuntu:16.04"
+
+# Optional: Pick zero or more services to be used on all builds.
+# Only needed when using a docker container to run your tests in.
+# Check out: http://docs.gitlab.com/ce/ci/docker/using_docker_images.html#what-is-service
+services:
+  - postgres:latest
+
+variables:
+  POSTGRES_DB: cue_doc_test
+  POSTGRES_USER: gitlab_ci_runner
+  POSTGRES_PASSWORD: ""
+  DATABASE_TEST_URL: postgres://gitlab_ci_runner@postgres/cue_doc_test
+  DATABASE_URL: postgres://gitlab_ci_runner@postgres/cue_doc_test
+
+# Optional: Install a C compiler, cmake and git into the container.
+# You will often need this when you (or any of your dependencies) depends on C code.
+before_script:
+  - apt-get update -y
+  - apt-get install wget -y
+  - apt-get install curl -y
+  - apt-get install build-essential -y
+  - curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly
+  - export PATH="$HOME/.cargo/bin:$PATH"
+  - echo $PATH
+  - rustc --version && cargo --version      # Print version info for debugging
+  - cargo install diesel_cli
+  - diesel setup
+
+stages:
+  - build
+  - test
+
+# Use cargo to test the project
+build:
+  stage: build
+  script:
+  - cargo build --verbose --jobs 1 --release # Don't paralize to make errors more readable
+  artifacts:
+    paths:
+    - target/
+    
+# Use cargo to test the project
+test:
+  stage: test
+  script:
+  - cargo test --verbose --jobs 1 --release # Don't paralize to make errors more readable
+  dependencies:
+  - build
