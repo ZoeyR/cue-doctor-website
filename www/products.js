@@ -11,6 +11,8 @@ if(!sessionStorage.order && !sessionStorage.count)
     sessionStorage.count = 0;
 }
 
+$("#cartcount").text(sessionStorage.count);
+
   //alert("Now going to make POST ajax call - results will appear soon");
 $.get("/products", function(data,status) {
         //obj = JSON.parse(data);
@@ -24,7 +26,7 @@ $.get("/products", function(data,status) {
 });
 
 
-$("#cartcount").text(sessionStorage.count);
+
 
 
 
