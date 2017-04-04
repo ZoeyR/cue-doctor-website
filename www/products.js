@@ -31,13 +31,13 @@ $.get("/products", function(data,status) {
 
 
 $("#order").click(function() {
+    sessionStorage.count = Number(sessionStorage.count) + 1;
     $.get("/products", function(data,status) {
         //obj = JSON.parse(data);
         for(i = 0; i < data.length; i++) {
             if(data[i].name == document.title) {
                 //$("#bodytext").text(obj[i].description);
-                sessionStorage.setItem("order", JSON.stringify(data[i]));
-                sessionStorage.count += 1;
+                sessionStorage.order += JSON.stringify(data[i]);
             }
         }
     });
