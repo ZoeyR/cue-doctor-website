@@ -99,10 +99,13 @@ fn get_order() {
     let mut req = MockRequest::new(Method::Get, "/orders?id=1");
     let mut res = req.dispatch_with(&rocket);
 
-    let res_order: Order = res.body()
+    let mut res_order: Order = res.body()
         .and_then(|b| b.into_string())
         .and_then(|body_str| from_str(&body_str).ok())
         .unwrap();
+    assert_eq!(2, res_order.items.len());
+    res_order.items[0].product.description = "TODO".into();
+    res_order.items[1].product.description = "TODO".into();
     assert_eq!(order, res_order);
 }
 
