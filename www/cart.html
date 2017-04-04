@@ -1,12 +1,15 @@
 <html>
+
 <head>
-<meta charset="utf-8">
+    <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
     <title>Cue Doctor Cart</title>
-
+    <script src=" http://code.jquery.com/jquery-3.2.1.min.js " integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous"></script>
+    <script src="cart.js"></script>
     <!-- Bootstrap -->
     <link href="bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="Styling.css" rel="stylesheet">
@@ -16,39 +19,56 @@
     <nav class="navbar navbar-default">
         <div class="container">
             <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
+                    aria-expanded="false">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand" href="mainPage.html">
-                    <img alt="Logo" src="images/cue_doctor_logo_final_merge.svg" style="width:81px;top:5px" >
+                    <img alt="Logo" src="images/cue_doctor_logo_final_merge.svg" style="width:81px;top:5px">
                 </a>
-        </div>
+            </div>
 
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav">
-                <li><a href="cuewax.html">Cue Wax</a></li>
-                <li><a href="shaftcleaner.html">Shaft Cleaner</a></li>
-                <li><a href="dentbuffer.html">Dent Buffer</a></li>
-                <li><a href="cuecloth.html">Cue Cloth</a></li>
-            </ul>
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li><a href="cuewax.html">Cue Wax</a></li>
+                    <li><a href="shaftcleaner.html">Shaft Cleaner</a></li>
+                    <li><a href="dentbuffer.html">Dent Buffer</a></li>
+                    <li><a href="cuecloth.html">Cue Cloth</a></li>
+                </ul>
 
-            <ul class="nav navbar-nav navbar-right">
-                <li class="active"><a href="cart.html">Cart <span id="cartcount">0</span><span class="sr-only">(current)</span></a></li>
-            <!--
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="active"><a href="cart.html">Cart <span id="cartcount">0</span><span class="sr-only">(current)</span></a></li>
+                    <!--
                 "Coming is a nested grid, with the outer grid being 2 columns, 1 row. In the left column is a grid of ordered object, the right column holds the total."
              -->
-        </div> <!-- container -->
+            </div>
+            <!-- container -->
         </div>
     </nav>
 
-<div id="body">
-    <p>
-        "Coming is a nested grid, with the outer grid being 2 columns, 1 row. In the left column is a grid of ordered object, the right column holds the total."
-    </p>
-</div>
+    <div id="body">
+        <div class="row">
+            <div id="order_items" class="col-md-11">
+
+            </div>
+            <div class="col-md-1">
+                <div class="row">
+                    <div class="col-xs-6">
+                        Total:
+                    </div>
+                    <div id="order_cost" class="col-xs-6">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <input id="submit_order" type="button" value="Place Order" />
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
 </body>
@@ -57,4 +77,5 @@
 <footer id="footer">
     <p>Cue Doctor | Phone: (515) 232-9977 | Toll Free: (888) 428-3362 | Email:<a href="mailto: cuedoctor1@gmail.com?Subject=Cue%20Doctor">cuedoctor1@gmail.com</a></p>
 </footer>
+
 </html>
