@@ -10,7 +10,13 @@ $(document).ready(function () {
         sessionStorage.count = 0;
     }
 
-    $("#cartcount").text(sessionStorage.count);
+    function updateCount() {
+        $("#cartcount").text(sessionStorage.count);
+    }
+
+    updateCount();
+
+    
 
     //alert("Now going to make POST ajax call - results will appear soon");
     $.get("/products", function (data, status) {
@@ -31,6 +37,7 @@ $(document).ready(function () {
 
     $("#order").click(function () {
         sessionStorage.count = Number(sessionStorage.count) + 1;
+        updateCount();
         $.get("/products", function (data, status) {
             //obj = JSON.parse(data);
             for (i = 0; i < data.length; i++) {
