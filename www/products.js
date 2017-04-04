@@ -35,8 +35,12 @@ $(document).ready(function () {
             //obj = JSON.parse(data);
             for (i = 0; i < data.length; i++) {
                 if (data[i].name == document.title) {
-                    //$("#bodytext").text(obj[i].description);
-                    sessionStorage.order += JSON.stringify(data[i]);
+                    if (sessionStorage.order == null) {
+                        sessionStorage.order = JSON.stringify([]);
+                    }
+                    let cart = JSON.parse(sessionStorage.order);
+                    cart.push(data[i]);
+                    sessionStorage.order = JSON.stringify(cart);
                 }
             }
         });
